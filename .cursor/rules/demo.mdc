@@ -7,7 +7,7 @@
 
 ## Path Handling
 - Never print or display full absolute paths
-- Always convert paths to be relative to the home directory (`~`)
+- ALWAYS convert paths to be relative to the home directory (`~`)
 - Use `~` prefix for home directory references
 - Example: `/Users/username/project/file.txt` should be displayed as `~/project/file.txt`
 
