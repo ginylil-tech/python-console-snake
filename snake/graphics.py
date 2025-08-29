@@ -3,8 +3,23 @@ import stage
 import game
 import theme
 import curses
+import os
+import sys
+
 
 screen = None
+
+
+def reset_terminal_fallback():
+    """Fallback terminal reset if curses fails"""
+    try:
+        os.system('stty sane 2>/dev/null')
+        os.system('tput reset 2>/dev/null')
+        os.system('tput cnorm 2>/dev/null')
+        os.system('stty echo 2>/dev/null')
+        os.system('clear 2>/dev/null')
+    except:
+        pass
 
 
 def drawTile(x, y, tile='', color=None):
@@ -131,17 +146,31 @@ def update():
 def init():
     global screen
 
-    screen = curses.initscr()
-    curses.noecho()
-    curses.cbreak()
-    curses.curs_set(0)
-    curses.start_color()
-    screen.nodelay(1)
+    try:
+        screen = curses.initscr()
+        curses.noecho()
+        curses.cbreak()
+        curses.curs_set(0)
+        curses.start_color()
+        screen.nodelay(1)
+    except Exception as e:
+        # If curses fails, try to restore terminal and exit gracefully
+        print("Failed to initialize terminal: %s" % e)
+        reset_terminal_fallback()
+        sys.exit(1)
 
 
 def exit():
-    screen.clear()
-    screen.keypad(0)
-    curses.echo()
-    curses.nocbreak()
-    curses.endwin()
+    try:
+        if screen:
+            screen.clear()
+            screen.keypad(0)
+            curses.echo()
+            curses.nocbreak()
+            curses.endwin()
+    except:
+        # If curses exit fails, use fallback
+        reset_terminal_fallback()
+    finally:
+        # Always try fallback to ensure terminal is restored
+        reset_terminal_fallback()

@@ -17,8 +17,16 @@ help:
 	@echo "  format       - Format code (if available)"
 	@echo "  docs         - Generate documentation (if available)"
 
-# Run the game
+# Run the game (safe mode - ensures terminal restoration)
 run:
+	python snake
+
+# Run the original game directly (use with caution)
+run-original:
+	python snake
+
+# Run in debug mode (shows errors clearly, still restores terminal)
+run-debug:
 	python snake
 
 # Run with specific size
@@ -84,4 +92,14 @@ themes:
 	@echo "  classic  - Default theme"
 	@echo "  minimal  - Minimal theme"
 	@echo "  jungle   - Jungle theme"
-	@echo "  custom   - Custom theme" 
+	@echo "  custom   - Custom theme"
+
+# Reset terminal to normal state (useful if terminal gets messed up)
+reset-terminal:
+	@echo "Resetting terminal..."
+	@stty sane 2>/dev/null || true
+	@tput reset 2>/dev/null || true
+	@tput cnorm 2>/dev/null || true
+	@stty echo 2>/dev/null || true
+	@clear 2>/dev/null || true
+	@echo "Terminal reset complete" 
