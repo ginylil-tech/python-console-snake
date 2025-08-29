@@ -1,14 +1,14 @@
 
-import graphics
-import theme
-import gameloop
-import parser
-import stage
+from . import graphics
+from . import theme
+from . import gameloop
+from . import parser
+from . import stage
 
 
 def exit():
     graphics.exit()
-    print 'Come back soon!'
+    print('Come back soon!')
 
 
 def run():

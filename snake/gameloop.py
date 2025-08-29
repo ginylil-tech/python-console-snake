@@ -1,9 +1,9 @@
 
 import time
-import graphics
-import game
-import config
-import controls
+from . import graphics
+from . import game
+from . import config
+from . import controls
 
 last_update = None
 playing = False

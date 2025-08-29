@@ -1,17 +1,28 @@
 
-import graphics
-import theme
-import gameloop
-import game
-import parser
-import stage
+from . import graphics
+from . import theme
+from . import gameloop
+from . import game
+from . import parser
+from . import stage
+import signal
+import sys
 
 
 def exit():
     graphics.exit()
 
+def signal_handler(sig, frame):
+    """Handle signals like Ctrl+C gracefully"""
+    exit()
+    sys.exit(0)
+
 
 def run():
+    # Set up signal handlers for clean exit
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
     try:
         parser.init()
         stage.init()
@@ -31,4 +42,5 @@ def run():
         # Normal completion - clean exit
         exit()
 
-run()
+if __name__ == '__main__':
+    run()

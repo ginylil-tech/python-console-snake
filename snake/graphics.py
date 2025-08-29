@@ -1,7 +1,7 @@
 
-import stage
-import game
-import theme
+from . import stage
+from . import game
+from . import theme
 import curses
 
 screen = None
@@ -10,12 +10,21 @@ screen = None
 def drawTile(x, y, tile='', color=None):
     color = color or theme.get_color('default')
 
-    x = x * 2 + stage.padding[3] * 2 + stage.width / 2
-    y += stage.padding[0] + stage.height / 2
+    x = x * 2 + stage.padding[3] * 2 + stage.width // 2
+    y += stage.padding[0] + stage.height // 2
 
-    screen.addstr(y, x, tile, color)
-    if (len(tile) < 2):
-        screen.addstr(y, x + 1, tile, color)
+    # Get terminal dimensions to prevent drawing outside bounds
+    try:
+        max_y, max_x = screen.getmaxyx()
+        
+        # Only draw if coordinates are within terminal bounds
+        if 0 <= y < max_y and 0 <= x < max_x - len(tile):
+            screen.addstr(y, x, tile, color)
+            if (len(tile) < 2) and x + 1 < max_x:
+                screen.addstr(y, x + 1, tile, color)
+    except curses.error:
+        # Silently ignore curses errors (terminal too small, etc.)
+        pass
 
 
 def drawGameOver():
@@ -26,27 +35,27 @@ def drawGameOver():
 def drawScore():
     score_formatted = str(game.score).zfill(2)
     drawTile(
-        (stage.width / 2) - 1,
-        (-stage.height / 2) - 1,
+        (stage.width // 2) - 1,
+        (-stage.height // 2) - 1,
         score_formatted,
         theme.get_color('border')
         )
 
 
 def drawLives():
-    posx = (-stage.width / 2) + 3
-    for x in xrange(1, game.lives + 1):
+    posx = (-stage.width // 2) + 3
+    for x in range(1, game.lives + 1):
         posx += 1
         drawTile(
             posx,
-            (-stage.height / 2) - 1,
+            (-stage.height // 2) - 1,
             theme.get_tile('lives'),
             theme.get_color('lives')
             )
         posx += 1
         drawTile(
             posx,
-            (-stage.height / 2) - 1,
+            (-stage.height // 2) - 1,
             theme.get_tile('border-h'),
             theme.get_color('border')
             )
@@ -115,9 +124,9 @@ def drawBorders():
 
 def drawText():
     color = theme.get_color('border')
-    drawTile((stage.width / 2) - 4, (-stage.height / 2) - 1, "score:", color)
-    drawTile((-stage.width / 2), (-stage.height / 2) - 1, "lives:", color)
-    drawTile(-5, (stage.height / 2), " Press Q to quit ", color)
+    drawTile((stage.width // 2) - 4, (-stage.height // 2) - 1, "score:", color)
+    drawTile((-stage.width // 2), (-stage.height // 2) - 1, "lives:", color)
+    drawTile(-5, (stage.height // 2), " Press Q to quit ", color)
 
 
 def update():
@@ -132,26 +141,60 @@ def init():
     global screen
 
     screen = curses.initscr()
+    
+    # Check if terminal is large enough
+    max_y, max_x = screen.getmaxyx()
+    min_height, min_width = 10, 20  # Minimum terminal size
+    
+    if max_y < min_height or max_x < min_width:
+        curses.endwin()
+        print(f"Terminal too small! Current: {max_x}x{max_y}, Minimum required: {min_width}x{min_height}")
+        print("Please resize your terminal and try again.")
+        import sys
+        sys.exit(1)
+    
     curses.noecho()
     curses.cbreak()
     curses.curs_set(0)
-    curses.start_color()
+    
+    # Initialize colors if supported
+    if curses.has_colors():
+        curses.start_color()
+    
     screen.nodelay(1)
 
 
 def exit():
     try:
         if screen:
+            # Clear the screen and refresh
             screen.clear()
+            screen.refresh()
             screen.keypad(0)
+        
+        # Reset all curses settings
         curses.echo()
         curses.nocbreak()
         curses.curs_set(1)  # Restore cursor visibility
+        
+        # Reset colors to default
+        if curses.has_colors():
+            curses.use_default_colors()
+        
+        # Properly end curses mode
         curses.endwin()
-    except:
-        # If curses cleanup fails, try alternative terminal reset methods
+        
+        # Additional terminal reset to ensure clean state
         import os
+        os.system('reset 2>/dev/null || true')
+        
+    except Exception as e:
+        # If curses cleanup fails, try comprehensive terminal reset
+        import os
+        print(f"Curses cleanup failed: {e}")
+        os.system('reset 2>/dev/null || true')
         os.system('stty sane 2>/dev/null || true')
         os.system('tput reset 2>/dev/null || true')
         os.system('tput cnorm 2>/dev/null || true')
         os.system('stty echo 2>/dev/null || true')
+        os.system('tput sgr0 2>/dev/null || true')  # Reset all attributes

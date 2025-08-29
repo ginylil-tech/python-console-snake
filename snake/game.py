@@ -1,9 +1,9 @@
 
-import stage
-import gameloop
+from . import stage
+from . import gameloop
 import math
 import random
-import config
+from . import config
 
 direction = (0, 0)
 lastPos = (0, 0)
@@ -85,7 +85,7 @@ def reset():
     apples = []
     grow = config.initial_size - 1
 
-    apples_count += int(math.floor(getGameArea() / config.apple_domain))
+    apples_count += int(math.floor(getGameArea() // config.apple_domain))
 
     for i in range(0, apples_count):
         spawnApple()
