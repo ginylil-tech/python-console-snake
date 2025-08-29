@@ -21,6 +21,14 @@ def run():
         gameloop.start()
 
     except KeyboardInterrupt:
+        # User pressed Ctrl+C - normal exit, no need to show error
+        pass
+    except Exception as e:
+        # Any other error occurred - ensure terminal cleanup first, then re-raise
+        exit()
+        raise  # Re-raise the original exception so user can see it
+    else:
+        # Normal completion - clean exit
         exit()
 
 run()

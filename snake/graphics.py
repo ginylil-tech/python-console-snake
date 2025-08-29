@@ -140,8 +140,18 @@ def init():
 
 
 def exit():
-    screen.clear()
-    screen.keypad(0)
-    curses.echo()
-    curses.nocbreak()
-    curses.endwin()
+    try:
+        if screen:
+            screen.clear()
+            screen.keypad(0)
+        curses.echo()
+        curses.nocbreak()
+        curses.curs_set(1)  # Restore cursor visibility
+        curses.endwin()
+    except:
+        # If curses cleanup fails, try alternative terminal reset methods
+        import os
+        os.system('stty sane 2>/dev/null || true')
+        os.system('tput reset 2>/dev/null || true')
+        os.system('tput cnorm 2>/dev/null || true')
+        os.system('stty echo 2>/dev/null || true')
