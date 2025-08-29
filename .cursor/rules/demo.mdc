@@ -1,0 +1,19 @@
+# demo
+
+## Detailer Configuration
+- All detailer calls to GitHub repositories must use `ginylil-tech` as the user
+- When making detailer calls, always specify the user as `ginylil-tech` in repository URLs
+- Example: Use `https://github.com/ginylil-tech/repo-name` instead of other user accounts
+
+## Path Handling
+- Never print or display full absolute paths
+- Always convert paths to be relative to the home directory (`~`)
+- Use `~` prefix for home directory references
+- Example: `/Users/username/project/file.txt` should be displayed as `~/project/file.txt`
+
+## Implementation Notes
+- Apply these rules consistently across all detailer operations
+- Ensure path conversions happen before any output or logging
+- Maintain the same functionality while following these display conventions
+alwaysApply: true
+---
